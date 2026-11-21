@@ -261,6 +261,23 @@ Keep your actual `.env` file and API keys out of Git. The example file is safe t
 
 ---
 
+## Roadmap
+
+ECHO is a work in progress. There are a few things I'd like to improve as I keep building it:
+
+- [ ] **Make search more useful** — Add better filters for courses, topics and batches, and improve how results are ranked.
+- [ ] **Let people correct memories** — Give students an easier way to flag advice that's outdated or no longer accurate.
+- [ ] **Show where answers come from** — Make it clearer which saved Echoes were used to put an answer together.
+- [ ] **Improve the WhatsApp bot** — Make it better at recognising useful conversations and less likely to pick up irrelevant messages.
+- [ ] **Use unanswered questions better** — Turn knowledge gaps into a clearer way to see what students are struggling to find.
+- [ ] **Make contributions more collaborative** — Explore ways for students to confirm, edit and build on information shared by others.
+- [ ] **Improve the mobile experience** — Make recording, searching and browsing easier on phones.
+- [ ] **Keep information reliable over time** — Explore more ways to check, refresh and flag memories as campus information changes.
+
+These are ideas rather than fixed deadlines. I'll keep updating this list as ECHO develops.
+
+---
+
 ## Deployment
 
 The repository includes a Dockerfile and Railway configuration for deployment.
