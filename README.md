@@ -1,210 +1,293 @@
-<div align="center">
+# ECHO
 
-# 👻 ECHO
-### The Living Institutional Memory Engine for Universities
+**Campus knowledge shouldn't disappear when a batch graduates.**
 
-**"Every batch leaves. Make sure their knowledge didn't take everything with them."**
+ECHO is a shared memory for a university community. It collects useful answers, advice and campus updates from senior students, then makes that information easier for juniors to find later.
 
-[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Flask](https://img.shields.io/badge/Flask-3.0-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
-[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-Embeddings%20%26%20Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
-[![Groq](https://img.shields.io/badge/Groq-Whisper%20%26%20LLM-F55036?style=for-the-badge)](https://groq.com/)
-[![WhatsApp](https://img.shields.io/badge/WhatsApp%20Bot-Baileys%20Multi--Device-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://github.com/WhiskeySockets/Baileys)
-[![Deployed on Railway](https://img.shields.io/badge/Railway-Production%20Live-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)](https://railway.app)
+A senior can record a quick voice note on the web app, or useful question-and-answer exchanges can be picked up from a WhatsApp group. When someone searches, ECHO looks for related memories and brings the most relevant ones together into an answer.
 
-</div>
+The idea is simple: students shouldn't have to ask the same questions every semester just because the people who knew the answers have moved on.
 
 ---
 
-## 📌 The Problem
+## The problem
 
-At modern engineering colleges and universities, senior wisdom is trapped in ephemeral WhatsApp groups, late-night DMs, and hallway conversations. 
+A lot of the most useful information about college never makes it into a handbook.
 
-* *Which professor is strict with midterms?*
-* *How do you balance an IIT Madras dual degree with 48-hour project sprints?*
-* *How did past juniors crack international internships in Singapore or the Apple Academy?*
+It lives in WhatsApp groups, personal chats, conversations after class and advice passed from one batch to the next. That information is hard to search, easy to lose, and often repeated by every new batch.
 
-When senior batches graduate, **years of institutional survival knowledge vanish forever**. Junior batches repeatedly make the same mistakes, ask the same unanswered questions, and struggle with the same unwritten rules.
+ECHO gives that knowledge a place to stay.
+
+## What you can do with ECHO
+
+### Record and save knowledge
+
+Seniors can share what they know through the web app. They can record audio in the browser or provide a transcript, add course and topic details, and save it as an Echo. Audio is transcribed before being stored when a transcript is not already provided.
+
+### Search by meaning, not just keywords
+
+A junior can ask a question in their own words. ECHO creates an embedding for the query and compares it with saved memories using cosine similarity. This helps find related advice even when the wording is different.
+
+### Get an answer from multiple memories
+
+When relevant memories are found, ECHO uses its language-model service to combine the context into one response. The matching memories remain available alongside the synthesis, so the answer is not just an isolated chatbot reply.
+
+### Capture useful WhatsApp conversations
+
+The separate WhatsApp bot listens to group messages. It looks for questions and possible replies, checks whether a conversation contains a useful campus Q&A, and sends valid information to the same ECHO store.
+
+It can also look up a question against saved memories and reply in the group when that option is enabled. If it cannot post in a restricted group, it can try sending the answer privately to the student.
+
+### Build confidence through confirmations
+
+When similar information appears again, ECHO can merge it with an existing memory rather than treating it as completely new. Confirmations and the groups in which a memory has appeared are recorded, giving students more context about how widely the advice has been echoed.
+
+### Keep older advice in perspective
+
+Campus information can become outdated. ECHO tracks when a memory was last confirmed and gives it a freshness status:
+
+- **Fresh:** confirmed within the last 6 months
+- **Aging:** last confirmed 6–12 months ago
+- **Stale:** last confirmed more than a year ago
+
+Older memories can be marked as still true to refresh their confirmation date.
+
+### Find what students still need answers to
+
+Searches that do not find a useful match are logged. The Knowledge Gaps page groups repeated unanswered queries so the team can see what students are looking for and where more senior input would help.
+
+### Share a memory with a QR code
+
+Each Echo can have its own QR code linking to its page. This makes it possible to put relevant knowledge somewhere students might need it, such as a lab, hostel noticeboard or classroom.
 
 ---
 
-## 💡 What is ECHO?
+## How it works
 
-**ECHO** is an AI-powered institutional memory engine that continuously captures, organizes, and synthesizes campus knowledge from both voice recordings on the web and real-time conversations across WhatsApp group chats.
+There are two main ways information enters ECHO.
 
+```text
+        WEB APP                                WHATSAPP GROUPS
+           |                                          |
+   Record audio / add text                   Questions and replies
+           |                                          |
+   Groq Whisper transcription               Question and reply checks
+           |                                          |
+           +------------------+-----------------------+
+                              |
+                       Create an embedding
+                              |
+                    Compare with saved memories
+                              |
+                    Store or confirm an Echo
+                              |
+                         SQLite database
+                              |
+                 +------------+-------------+
+                 |                          |
+             Web search                 WhatsApp search
+                 |                          |
+        Relevant memories found       Relevant memories found
+                 |                          |
+        Answer synthesis with LLM      Reply in the conversation
+                 |                          |
+                 +------------+-------------+
+                              |
+                       Knowledge stays
+                       available to the
+                         next batch
 ```
-       ┌────────────────────────────────────────────────────────┐
-       │                 CAMPUS KNOWLEDGE SOURCES                │
-       └────────────────────────────────────────────────────────┘
-                 │                                    │
-    🎙️ Voice Notes & Web Submissions        💬 WhatsApp Group Chats
-                 │                                    │
-                 ▼                                    ▼
-       [ Groq Whisper Large v3 ]             [ Baileys Event Stream ]
-        • Speech-to-Text Transcription        • Multi-lingual Intent Detection
-                 │                            • Q&A Verification (Groq/Gemini)
-                 ▼                                    │
-       [ Gemini Embeddings Engine ] ◄─────────────────┘
-        • 3072-Dimensional Vector Generation
-        • Cross-Group Deduplication & Consensus Merging
-                 │
-                 ▼
-       ┌────────────────────────────────────────────────────────┐
-       │             ECHO MULTI-CHANNEL CORE (SQLite)           │
-       │    • Persistent Knowledge Store   • Time-Decay Engine  │
-       │    • Knowledge Gaps Tracker       • Consensus Metrics  │
-       └────────────────────────────────────────────────────────┘
-                 │                                    │
-                 ▼                                    ▼
-       🌐 WEB APP DISCOVERY                  💬 WHATSAPP BOT REPLIES
-        • Semantic Cosine Search              • Automated Instant Answers
-        • Senior Consensus Synthesis          • DM Fallback for Locked Groups
-        • Interactive Knowledge Radar         • 👻 Silent Confirmation Reactions
-```
+
+For web searches, the query is embedded and compared with stored vectors. Results above the configured similarity threshold are ranked, and the best matches are passed to the synthesis service.
+
+The WhatsApp worker talks to the Flask app through its API. Both channels use the same memory store, so a useful answer captured in a group can later turn up in a web search too.
 
 ---
 
-## 🚀 Key Features
+## Tech stack
 
-### 1. 💬 Autonomous WhatsApp Knowledge Bot
-* **Multi-Lingual Question Intent Detection**: Understands questions in plain English, Hindi, and Hinglish (e.g. *"Pushkar sir kaisa padhate h"*, *"attendance criteria kya hai"*), with or without question marks.
-* **Instant Auto-Replies**: When a student asks a question in any group, Echo semantically matches the knowledge base and delivers a verified answer in seconds.
-* **Locked Announcement Channel Support**: If the bot lacks permission to post in a restricted announcement channel, it privately direct-messages (DM) the student the verified answer.
-* **Passive Conversation Capture**: When a senior answers a junior's question in chat, Echo verifies the pair via LLM and saves it to the central repository with a 👻 ghost reaction.
-* **Silent Confirmation Voting**: Reactions like 👍, 💯, or messages like `+1` / `vouch` automatically boost the memory's confidence score across groups.
-
-### 2. 🧠 "Ask the Batch" — Consensus Synthesis
-* Instead of returning disconnected search links, Echo analyzes matching senior memories and uses **Google Gemini** & **Groq** to generate a single synthesized consensus answer.
-* Displays a live **Senior Agreement Meter** showing the percentage of seniors aligned on the advice.
-
-### 3. 🎙️ 60-Second Senior Voice Studio
-* Built-in browser audio recorder powered by native `MediaRecorder` and real-time audio equalizers.
-* Automatic transcription via **Groq Whisper Large v3 Turbo** with near-zero latency.
-* Tagged by Course Code, Professor, and Category with a real-time live preview card.
-
-### 4. 📡 The Knowledge Gaps Radar
-* Automatically logs every student search query that currently lacks a senior answer.
-* Visualizes campus blind spots ranked by question frequency, enabling senior mentors and student councils to address high-demand topics with 1-click answer workflows.
-
-### 5. 🧬 Time-Decay Memory Health
-* Every piece of advice has a dynamic health score based on time-decay math and confirmation counts:
-  - 🟢 **Fresh** (< 6 months / recently reconfirmed)
-  - 🟡 **Aging** (6–12 months)
-  - 🔴 **Stale** (> 1 year / outdated curriculum)
-* Students can click **"Mark as Still True"** to re-verify older advice and restore freshness.
-
-### 6. 🏷️ JIT (Just-In-Time) QR Handover
-* One-click printable QR code generation for any specific Echo.
-* Stick them on hardware lab doors, hostel noticeboards, or professor cabins so juniors can scan and listen to senior notes right where they need them.
-
----
-
-## 🛠️ Technology Stack
-
-| Domain | Technology | Purpose |
+| Part | Technology | What it does |
 |---|---|---|
-| **Backend** | Python 3.11+, Flask | High-throughput REST API and templating engine |
-| **Speech-to-Text** | Groq Whisper Large v3 Turbo | Blazing-fast voice note transcription |
-| **Vector Embeddings** | Google Gemini `gemini-embedding-001` | 3072-dimensional semantic vector search |
-| **Synthesis & LLM** | Google Gemini 3.1 Flash + Groq | Multi-perspective consensus answer synthesis |
-| **WhatsApp Layer** | Node.js + `@whiskeysockets/baileys` | Multi-device WebSocket connection to WhatsApp |
-| **Database** | SQLite + NumPy | Local vector math and institutional storage |
-| **Styling & UI** | Vanilla CSS3 (Custom Design System) | Glassmorphism, CSS keyframe animations, dark mode |
-| **Deployment** | Railway | Microservices architecture with persistent volumes |
+| Web application | Python, Flask | Serves the application and API |
+| Database | SQLite | Stores memories, embeddings and search history |
+| Vector operations | NumPy | Calculates cosine similarity for semantic search |
+| Speech-to-text | Groq Whisper | Transcribes voice recordings |
+| Embeddings | Google Gemini | Converts text and queries into vectors |
+| Answer synthesis | Gemini / Groq | Combines relevant memories into a response |
+| WhatsApp connection | Node.js, Baileys | Connects the bot to WhatsApp groups |
+| QR codes | Python qrcode, Pillow | Generates QR codes for individual memories |
+| Deployment | Docker, Railway | Packages and hosts the application |
 
 ---
 
-## 🏁 Quick Start (Run Locally)
+## Project structure
 
-### 1. Prerequisites
-- Python 3.11 or higher
-- Node.js 18+ (for WhatsApp Bot)
-- Free API keys from [Groq Console](https://console.groq.com/) and [Google AI Studio](https://aistudio.google.com/)
+```text
+Echo/
+├── app.py                  # Flask application setup
+├── config.py               # Environment settings and model configuration
+├── requirements.txt        # Python dependencies
+├── Dockerfile              # Container configuration
+├── railway.toml            # Railway deployment settings
+├── Procfile                # Gunicorn start command
+│
+├── database/
+│   └── db.py               # SQLite schema and database operations
+│
+├── routes/
+│   ├── echoes.py           # Recording, browsing and memory pages
+│   ├── search.py           # Search and answer results
+│   └── admin.py            # Stats, knowledge gaps and bot endpoints
+│
+├── services/
+│   ├── embeddings.py       # Text embeddings
+│   ├── transcription.py   # Audio transcription
+│   ├── search.py           # Semantic search and similarity
+│   ├── synthesis.py        # Answer synthesis
+│   └── memory_health.py   # Memory freshness calculations
+│
+├── templates/              # Flask HTML templates
+├── static/                 # CSS, JavaScript and audio files
+│
+└── whatsapp-bot/
+    ├── bot.js              # WhatsApp event handling
+    └── package.json        # Node dependencies and scripts
+```
 
-### 2. Backend Setup
+---
+
+## Run it locally
+
+You will need:
+
+- Python 3.11 or newer
+- Node.js 20 or newer (for the WhatsApp bot)
+- A Groq API key
+- A Google AI Studio API key
+
+### 1. Clone the repository
+
 ```bash
-# Clone the repository
-git clone https://github.com/GyatsoYT/Echo.git
+git clone https://github.com/bhoiaaryansingh-aafl/Echo.git
 cd Echo
+```
 
-# Install Python dependencies
+### 2. Set up the Python app
+
+Create and activate a virtual environment:
+
+```bash
+python -m venv .venv
+```
+
+On Windows:
+
+```bash
+.venv\Scripts\activate
+```
+
+On macOS or Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Install the dependencies:
+
+```bash
 pip install -r requirements.txt
+```
 
-# Create environment configuration
+### 3. Add your environment variables
+
+Copy the example file:
+
+```bash
+# Windows
+copy .env.example .env
+
+# macOS / Linux
 cp .env.example .env
 ```
 
-Edit `.env` with your API keys:
-```ini
-GROQ_API_KEY=gsk_...
-GEMINI_API_KEY=AIzaSy...
-SECRET_KEY=your-secret-key
+Then add your API keys to `.env`:
+
+```env
+GROQ_API_KEY=your_groq_api_key
+GEMINI_API_KEY=your_gemini_api_key
+SECRET_KEY=your_random_secret_key
 ```
 
-Run the Flask server:
+For local development, you can leave `DATABASE_PATH` and `UPLOAD_FOLDER` unset. The app defaults to a local SQLite database and `static/audio` directory.
+
+### 4. Start the web app
+
 ```bash
 python app.py
 ```
-*Visit `http://localhost:5000` in your browser.*
 
----
+Open [http://localhost:5000](http://localhost:5000).
 
-### 3. WhatsApp Bot Setup
+### 5. Start the WhatsApp bot (optional)
+
+Open another terminal:
+
 ```bash
 cd whatsapp-bot
 npm install
-node bot.js
-```
-*Scan the QR code printed in the terminal (or at `http://localhost:5000/bot/qr`) using WhatsApp on your phone (`Linked Devices`).*
-
----
-
-## 🏛️ Architecture & Data Model
-
-```sql
--- Core Memory Units (Audio, Transcripts, Vector Embeddings)
-CREATE TABLE echoes (
-    id                INTEGER PRIMARY KEY AUTOINCREMENT,
-    course_tag        TEXT    NOT NULL,
-    professor_tag     TEXT,
-    topic_tag         TEXT,
-    transcript        TEXT    NOT NULL,
-    audio_path        TEXT    DEFAULT '',
-    embedding         BLOB    NOT NULL,
-    confirmations     INTEGER DEFAULT 1,
-    source            TEXT    DEFAULT 'web',
-    question_context  TEXT,
-    group_names       TEXT    DEFAULT '[]',
-    group_count       INTEGER DEFAULT 1,
-    last_confirmed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Search Analytics (Powers the Knowledge Gaps Radar)
-CREATE TABLE searches (
-    id                INTEGER PRIMARY KEY AUTOINCREMENT,
-    query_text        TEXT    NOT NULL,
-    best_match_score  REAL,
-    created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+npm start
 ```
 
----
+The bot uses the WhatsApp multi-device connection. Follow the QR or pairing instructions printed by the bot to link a WhatsApp account.
 
-## 🌐 Production Deployment (Railway)
-
-ECHO is configured for turnkey multi-service deployment on **Railway**:
-
-1. **Flask Web API**: Deployed with `Procfile` / `railway.toml` using `gunicorn app:app`.
-2. **WhatsApp Bot Worker**: Deployed in `whatsapp-bot/` using persistent volume storage for WhatsApp session keys (`/data/auth_session`).
-3. **Zero-Config Persistent Storage**: Configured via `DATABASE_PATH` and `UPLOAD_FOLDER` environment variables.
+The bot also needs its runtime configuration and a reachable Flask app URL. Check the configuration values used in `whatsapp-bot/bot.js` before starting it; run the bot only in a group where you have permission to connect it.
 
 ---
 
-## 📄 License
+## Configuration
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+The main app reads its settings from environment variables. The repository includes `.env.example` as a starting point.
 
-<div align="center">
-  <sub>Built for the Scaler School of Technology (SST) Community · People graduate. Knowledge shouldn't.</sub>
-</div>
+| Variable | Purpose |
+|---|---|
+| `GROQ_API_KEY` | Groq access for audio transcription and language-model calls |
+| `GEMINI_API_KEY` | Gemini access for embeddings and language-model calls |
+| `SECRET_KEY` | Flask session and application secret |
+| `FLASK_ENV` | Set to `production` for production configuration |
+| `DATABASE_PATH` | Location of the SQLite database; defaults to `echo.db` |
+| `UPLOAD_FOLDER` | Where uploaded audio is stored; defaults to `static/audio` |
+
+Keep your actual `.env` file and API keys out of Git. The example file is safe to commit; real credentials are not.
+
+---
+
+## Deployment
+
+The repository includes a Dockerfile and Railway configuration for deployment.
+
+The Flask app is served with Gunicorn. For persistent deployment, configure a Railway volume and set:
+
+- `DATABASE_PATH=/data/echo.db`
+- `UPLOAD_FOLDER=/data/audio`
+
+The WhatsApp bot is a separate Node.js process and needs its own running service and persistent storage for its linked-device session. It also needs the correct Flask service URL so it can send captured memories and search requests to the web app.
+
+---
+
+## A note on campus knowledge
+
+ECHO is meant to preserve useful student-to-student knowledge, not replace official college communication. Advice about exams, attendance, policies or deadlines should always be checked against the latest information from the college.
+
+Please get appropriate permission before connecting a bot to a WhatsApp group or saving messages from it. Avoid storing personal, private or sensitive conversations.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+Built for the Scaler School of Technology community.
+
+*People graduate. Knowledge shouldn't.*
